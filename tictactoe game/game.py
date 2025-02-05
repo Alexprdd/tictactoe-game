@@ -10,22 +10,60 @@ score={
     "X":0,
     "O":0
 }
+
 def checkwinner():
     for row in range(3):
-        if buttons[row][0]["text"]==buttons[row][1]["text"]==buttons[row][2]["text"]:
+        if buttons[row][0]["text"]==buttons[row][1]["text"]==buttons[row][2]["text"] != "":
             return True
     for column in range(3):
-        if buttons[0][column]["text"]==buttons[1][column]["text"]==buttons[2][column]["text"]:
+        if buttons[0][column]["text"]==buttons[1][column]["text"]==buttons[2][column]["text"] != "":
             return True
+    if buttons[0][0]["text"] == buttons[1][1]["text"] == buttons[2][2]["text"] != "":
+        return True
+    if buttons[2][0]["text"] == buttons[1][1]["text"] == buttons[0][2]["text"] != "":
+        return True
+    return False
+
 def reset_game():
+    global currentplayer
+    currentplayer="X"
+    for row in range(3):
+        for column in range(3):
+            buttons[row][column]["text"] = ""
+    update_Score_text()
+
 def update_Score(currentplayer):
+    score[currentplayer] += 1
+
+def update_Score_text():
+    score_label.config(text=f"Score: X={score["X"]}  O={score["O"]}", font=("Arial",12))
+
 def isboardfull():
+    return all(buttons[row][column]["text"] != "" for row in range(3) for column in range (3))
+                
+def ai_move():
+    global currentplayer
+    empty_buttons=[(row,column) for row in range (3) for column in range (3) if buttons[row][column]["text"] == ""]
+    if empty_buttons:
+        row,column = random.choice(empty_buttons)
+        buttons[row][column]["text"] = "O"
+        if checkwinner():
+            update_Score("O")
+            messagebox.showinfo("WINNER=...","AI Wins!")
+            reset_game()
+        elif isboardfull():
+            messagebox.showinfo("Game Over","TIE!")
+            reset_game()
+        else:
+            currentplayer="X"
 
 def on_button_clicked(row,column):
     global currentplayer
-    currentplayer="X"
+    print(row,column)
     if buttons[row][column]["text"]=="" and not checkwinner():
         buttons[row][column]["text"]=currentplayer
+        print(currentplayer)
+        print(mode)
         if checkwinner():
             update_Score(currentplayer)
             messagebox.showinfo("WINNER=...",f"Player {currentplayer}")
@@ -42,11 +80,11 @@ def on_button_clicked(row,column):
 def singleplayer_gamemode():
     global mode
     mode="Singleplayer"
-    startgame()
+    
 def multiplayer_gamemode():
     global mode
     mode="Multiplayer"
-    startgame()
+    
 #window
 window=tk.Tk()
 window.title("TicTacToe Game")
